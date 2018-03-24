@@ -1,0 +1,65 @@
+{% extends "shop/base.html" %}
+{% load static %}
+
+{% block title %}
+    Seu carrinho de compras
+{% endblock %}
+
+{% block content %}
+    <div class="d-block">
+    <h1>Seu carrinho de compras</h1>
+    <table class="table-responsive-sm table-responsive-md ">
+    <table class="cart table table-sm table-stripped table-bordered " style="height: 100px;">
+        <thead class="thead-dark">
+            <tr>
+                <th>Imagem</th>
+                <th>Produto</th>
+                <th>Quantidade</th>
+                <th>Remover</th>
+                <th>Valor Unitário</th>
+                <th>Valor Total</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for item in cart %}
+            {% with product=item.product %}
+            <tr>
+                <td class="align-top">
+                    <a href="{{ product.get_absolute_url }}">
+                        <img src="{% if product.image %}{{ product.image.url }}{% else %}{% static 'img/no_image.png' %}{% endif %}">
+                    </a>
+                </td>
+                <td class="align-top">{{ product.name }}</td>
+                <td class="align-top">
+                    <form action="{% url 'cart:cart_add' product.id %}" method="post">
+                        {{ item.update_quantity_form.quantity }}
+                        {{ item.update_quantity_form.update }}
+                        <input type="submit" value="Atualizar">
+                        {% csrf_token %}
+                    </form>
+                </td>
+                <td class="align-top"><a href="{% url 'cart:cart_remove' product.id %}">Remover</a></td>
+                <td class="align-top num">R$ {{ item.price }}</td>
+                <td class="align-top num">R$ {{ item.total_price }}</td>
+            </tr>
+            {% endwith %}
+        {% endfor %}
+        <tr class="total">
+            <td>Total</td>
+            <td colspan="4"></td>
+            <td class="num">R$ {{ cart.get_total_price }}</td>
+        </tr>
+        </tbody>
+    </table>
+    </table>
+    <p class="text-right">
+        {% if cart.get_total_price > 0 %}
+            <a href="{% url 'shop:product_list' %}" class="btn btn-outline-primary" role="button">Continuar comprando</a>
+            <a href="{% url 'orders:order_create' %}" class="btn btn-outline-success" role="button" >Fechar Pedido</a>
+        {% else %}
+            <a href="{% url 'shop:product_list' %}" class="btn btn-outline-success" role="button">Continuar comprando</a>
+            <a href="{% url 'orders:order_create' %}" class="btn btn-outline-danger disabled" role="button" >Fechar Pedido</a>
+        {% endif %}
+    </p>
+    </div>
+{% endblock %}
